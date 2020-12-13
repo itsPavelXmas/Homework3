@@ -4,23 +4,21 @@ const Sequelize = require('sequelize')
 
 const mysql = require('mysql2/promise')
 
-// TODO: change the credentials to fit your own
-// if user does not have the right to create, run (as root): GRANT ALL PRIVILEGES ON *.* TO 'app'@'localhost';
-const DB_USERNAME = 'app1'
-const DB_PASSWORD = 'welcome123'
+const DB_USERNAME = "root"
+const DB_PASSWORD = "parola123"
 
-let conn
+let connec
 
 mysql.createConnection({
     user : DB_USERNAME,
     password : DB_PASSWORD
 })
 .then((connection) => {
-    conn = connection
+    connec = connection
     return connection.query('CREATE DATABASE IF NOT EXISTS tw_homework')
 })
 .then(() => {
-    return conn.end()
+    return connec.end()
 })
 .catch((err) => {
     console.warn(err.stack)
@@ -31,23 +29,11 @@ const sequelize = new Sequelize('tw_homework', DB_USERNAME, DB_PASSWORD,{
     logging: false
 })
 
-let FoodItem = sequelize.define('foodItem', {
-    name : Sequelize.STRING,
-    category : {
-        type: Sequelize.STRING,
-        validate: {
-            len: [3, 10]
-        },
-        allowNull: false
-    },
-    calories : Sequelize.INTEGER
-},{
-    timestamps : false
-})
-
-
 const app = express()
-// TODO
+
+
+app.use(express.json()); 
+
 
 app.get('/create', async (req, res) => {
     try{
@@ -80,11 +66,45 @@ app.get('/food-items', async (req, res) => {
 })
 
 app.post('/food-items', async (req, res) => {
+    
     try{
-        // TODO
+        var stats, mess;
+        if(req.body.constructor === Object && Object.keys(req.body).length === 0) {
+            stats = 400;
+            mess = 'body is missing';
+       }
+       
+       else
+       
+       if(req.body.name === undefined ||  req.body.category === undefined || req.body.calories === undefined) 
+       { stats = 400;
+         mess = 'malformed request';
+       }
+       else
+        
+        if(req.body.calories <0)
+        { stats = 400;
+          mess = 'calories should be a positive number';
+        }
+        else
+
+        if (req.body.category.length <3 || req.body.category.length >10)
+        {stats = 400;
+         mess = 'not a valid category';
+        }
+        else
+        {
+        stats=201;
+        mess='created'
+        }
+    
+        
+         res.status(stats).json({message: mess});
+        
     }
+
     catch(err){
-        // TODO
+       res.status(stats).json({message : mess}) 
     }
 })
 
